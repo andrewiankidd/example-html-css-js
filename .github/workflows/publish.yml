@@ -1,0 +1,48 @@
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  prepare_release:
+    name: Prepare release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M-%S')"
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          draft: false
+          prerelease: false
+          tag_name: ${{ env.TAG_NAME }}
+          release_name: ${{ env.RELEASE_NAME }}
+        env:
+          TAG_NAME: release-${{ steps.date.outputs.date }}
+          RELEASE_NAME: release-${{ steps.date.outputs.date }}
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - id: step_upload_url
+        name: Store Release upload URL for proceeding jobs
+        run: echo "::set-output name=upload_url::${{ steps.create_release.outputs.upload_url }}"
+
+  publish_web:
+    name: Publish to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@4.1.4
+        with:
+          branch: gh-pages
+          folder: src
