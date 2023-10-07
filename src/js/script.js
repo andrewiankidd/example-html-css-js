@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 
         // ask for it until they type something
         while (!savedName) {
-            savedName = prompt("Hi! What's your name?");
+            savedName = prompt("Hi! Entre your name :D");
         }
 
         // save the new name
